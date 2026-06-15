@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import SearchBar from '../components/SearchBar';
@@ -25,7 +25,7 @@ const Home = () => {
    * @param {number} currentPage - The page to fetch
    * @param {string} query - Optional search string
    */
-  const fetchTodos = useCallback(async (currentPage = 0, query = '') => {
+  const fetchTodos = async (currentPage = 0, query = '') => {
     setLoading(true);
     const from = currentPage * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
@@ -56,7 +56,7 @@ const Home = () => {
       setHasMore(count > (currentPage + 1) * PAGE_SIZE);
     }
     setLoading(false);
-  }, []);
+  };
 
   /* ── Effect: Debounced Search ── */
   useEffect(() => {
@@ -67,7 +67,8 @@ const Home = () => {
     }, searchQuery ? 500 : 0); // Delay for search, instant for initial/clear
 
     return () => clearTimeout(timer);
-  }, [searchQuery, fetchTodos]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]); // fetchTodos is omitted to avoid infinite reload loop without useCallback
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
