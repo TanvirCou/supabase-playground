@@ -9,7 +9,7 @@ import { supabase } from '../utils/supabase';
 
 const PAGE_SIZE = 3;
 
-const Home = () => {
+const Home = ({onSetSession, userId}) => {
   const navigate = useNavigate();
 
   /* ── State ── */
@@ -77,9 +77,9 @@ const Home = () => {
   };
 
   /* ── CREATE / UPDATE ── */
-  const handleSubmit = async (title, description, todoToEdit) => {
+  const handleSubmit = async (title, description, image, todoToEdit) => {
     if (todoToEdit) {
-      const updatedTask = { title, description };
+      const updatedTask = { title, description, image };
 
       const { data: updatedTodo, error } = await supabase
         .from("todos")
@@ -97,7 +97,7 @@ const Home = () => {
       }
       setEditTodo(null);
     } else {
-      const newTodo = { title, description };
+      const newTodo = { title, description, image, user_id: userId };
 
       const { data: createdTodo, error } = await supabase
         .from("todos")
@@ -138,9 +138,17 @@ const Home = () => {
 
   const handleCancelEdit = () => setEditTodo(null);
 
-  const handleLogout = () => {
-    navigate('/login');
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error logging out:', error);
+    } else {
+      // onSetSession(null);
+      navigate('/login');
+    }
   };
+
+  
 
   return (
     <div className="home-page">

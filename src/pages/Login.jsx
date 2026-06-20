@@ -6,8 +6,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/auth.css';
+import { supabase } from '../utils/supabase';
 
-const Login = () => {
+const Login = ({onSetSession}) => {
   const navigate = useNavigate();
 
   const [email, setEmail]       = useState('');
@@ -37,14 +38,18 @@ const Login = () => {
 
     setLoading(true);
 
-    // TODO: Replace with Supabase Auth
-    // const { error } = await supabase.auth.signInWithPassword({ email, password });
-    await new Promise((res) => setTimeout(res, 800)); // simulate network delay
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    console.log(data);
+    
+
+    if (error) {
+      setAuthError(error.message);
+    } else {
+      onSetSession(data.session);
+      navigate('/');
+    }
 
     setLoading(false);
-
-    // Mock: any credentials work for now
-    navigate('/');
   };
 
   return (

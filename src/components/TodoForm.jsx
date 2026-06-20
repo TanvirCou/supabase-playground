@@ -11,6 +11,7 @@ import '../styles/home.css';
 const TodoForm = ({ editTodo, onSubmit, onCancel }) => {
   const [title, setTitle]           = useState('');
   const [description, setDescription] = useState('');
+  const [image, setImage]           = useState('');
   const [errors, setErrors]         = useState({});
 
   /* Populate form when entering edit mode */
@@ -18,10 +19,12 @@ const TodoForm = ({ editTodo, onSubmit, onCancel }) => {
     if (editTodo) {
       setTitle(editTodo.title);
       setDescription(editTodo.description);
+      setImage(editTodo.image);
       setErrors({});
     } else {
       setTitle('');
       setDescription('');
+      setImage('');
       setErrors({});
     }
   }, [editTodo]);
@@ -42,9 +45,10 @@ const TodoForm = ({ editTodo, onSubmit, onCancel }) => {
       setErrors(validationErrors);
       return;
     }
-    onSubmit(title.trim(), description.trim(), editTodo);
+    onSubmit(title.trim(), description.trim(), image.trim(), editTodo);
     setTitle('');
     setDescription('');
+    setImage('');
     setErrors({});
   };
 
@@ -136,6 +140,29 @@ const TodoForm = ({ editTodo, onSubmit, onCancel }) => {
               {errors.description}
             </span>
           )}
+
+          {/* Image field */}
+          <div className="form-group">
+            <label htmlFor="todo-image">Image</label>
+            <input
+              id="todo-image"
+              type="text"
+              placeholder="e.g. https://example.com/image.jpg"
+              value={image}
+              onChange={(e) => {
+                setImage(e.target.value);
+                if (errors.image) setErrors((prev) => ({ ...prev, image: '' }));
+              }}
+            />
+            {errors.image && (
+              <span className="form-error" role="alert">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                </svg>
+                {errors.image}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Actions */}

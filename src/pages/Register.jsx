@@ -6,8 +6,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/auth.css';
+import { supabase } from '../utils/supabase';
 
-const Register = () => {
+const Register = ({onSetSession}) => {
   const navigate = useNavigate();
 
   const [email, setEmail]       = useState('');
@@ -39,14 +40,17 @@ const Register = () => {
 
     setLoading(true);
 
-    // TODO: Replace with Supabase Auth
-    // const { error } = await supabase.auth.signUp({ email, password });
-    await new Promise((res) => setTimeout(res, 800)); // simulate network delay
+    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    if (error) {
+      setAuthError(error.message);
+    } else {
+      onSetSession(data.session);
+      navigate('/');
+    }
 
     setLoading(false);
 
-    // Mock: registration succeeds, redirect to login
-    navigate('/login');
   };
 
   return (
