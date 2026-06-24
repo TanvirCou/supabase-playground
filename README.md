@@ -119,7 +119,7 @@ Learned how to secure the database at the row level.
 - [Supabase CLI](https://supabase.com/docs/guides/cli) (optional, for local development)
 - Docker Desktop (required for local Supabase)
 
-### Option 1: Supabase Cloud (Recommended for Quick Start)
+### Option 1: Supabase Cloud 
 1. **Create a project**: Go to [Supabase Dashboard](https://app.supabase.com/) and create a new project.
 2. **Setup Database**: Run the SQL found in the features section to create the `todos` table and `todos-img` bucket.
 3. **Environment Variables**: Create a `.env` file:
