@@ -43,6 +43,27 @@ const TodoItem = ({ todo, isEditing, onEdit, onDelete }) => {
       <div className="todo-item-body">
         <h3 className="todo-item-title">{todo.title}</h3>
         <p className="todo-item-description">{todo.description}</p>
+
+        {/* Image or placeholder */}
+        <div className="todo-item-image-wrap">
+          {todo.image ? (
+            <img
+              src={todo.image}
+              alt={todo.title}
+              className="todo-item-image"
+            />
+          ) : (
+            <div className="todo-item-image-placeholder">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              <span>No image</span>
+            </div>
+          )}
+        </div>
+
         <div className="todo-item-meta">
           <svg
             width="11"

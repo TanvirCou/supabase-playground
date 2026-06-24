@@ -5,26 +5,30 @@
  * - onSubmit: callback(title, description, editTodo)
  * - onCancel: callback to exit edit mode
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import '../styles/home.css';
 
 const TodoForm = ({ editTodo, onSubmit, onCancel }) => {
   const [title, setTitle]           = useState('');
   const [description, setDescription] = useState('');
-  const [image, setImage]           = useState('');
+  const [image, setImage]           = useState(null);   // File object or null
+  const [preview, setPreview]       = useState('');     // for edit mode existing URL
   const [errors, setErrors]         = useState({});
+  const fileInputRef                 = useRef(null);
 
   /* Populate form when entering edit mode */
   useEffect(() => {
     if (editTodo) {
       setTitle(editTodo.title);
       setDescription(editTodo.description);
-      setImage(editTodo.image);
+      setImage(null);
+      setPreview(editTodo.image || '');
       setErrors({});
     } else {
       setTitle('');
       setDescription('');
-      setImage('');
+      setImage(null);
+      setPreview('');
       setErrors({});
     }
   }, [editTodo]);
@@ -45,11 +49,14 @@ const TodoForm = ({ editTodo, onSubmit, onCancel }) => {
       setErrors(validationErrors);
       return;
     }
-    onSubmit(title.trim(), description.trim(), image.trim(), editTodo);
+    
+    onSubmit(title.trim(), description.trim(), image, editTodo);
     setTitle('');
     setDescription('');
-    setImage('');
+    setImage(null);
+    setPreview('');
     setErrors({});
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const isEditing = Boolean(editTodo);
@@ -143,17 +150,48 @@ const TodoForm = ({ editTodo, onSubmit, onCancel }) => {
 
           {/* Image field */}
           <div className="form-group">
-            <label htmlFor="todo-image">Image</label>
+            <label className="image-label-text">Image</label>
+            {/* Hidden native file input */}
             <input
+              ref={fileInputRef}
               id="todo-image"
-              type="text"
-              placeholder="e.g. https://example.com/image.jpg"
-              value={image}
+              type="file"
+              accept="image/*"
+              className="file-input-hidden"
               onChange={(e) => {
-                setImage(e.target.value);
+                const file = e.target.files[0] || null;
+                setImage(file);
+                setPreview(file ? URL.createObjectURL(file) : '');
                 if (errors.image) setErrors((prev) => ({ ...prev, image: '' }));
               }}
             />
+            {/* Custom styled button */}
+            <label htmlFor="todo-image" className="file-input-btn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              {image ? image.name : 'Choose Image'}
+            </label>
+            {/* Preview */}
+            {preview && (
+              <div className="image-preview-wrapper">
+                <img src={preview} alt="preview" className="image-preview" />
+                <button
+                  type="button"
+                  className="image-preview-remove"
+                  onClick={() => {
+                    setImage(null);
+                    setPreview('');
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                  }}
+                  title="Remove image"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
             {errors.image && (
               <span className="form-error" role="alert">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">

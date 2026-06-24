@@ -70,6 +70,21 @@ const Home = ({onSetSession, userId}) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]); // fetchTodos is omitted to avoid infinite reload loop without useCallback
 
+
+  useEffect(() => {
+    const subscription = supabase.channel("onTasks");
+
+    subscription.on("postgres_changes", {event: "INSERT", schema: "public", table: "todos"}, (payload) => {
+      setTodos((prev) => [payload.new, ...prev]);
+    })
+
+    subscription.subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const handleLoadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
@@ -97,7 +112,16 @@ const Home = ({onSetSession, userId}) => {
       }
       setEditTodo(null);
     } else {
-      const newTodo = { title, description, image, user_id: userId };
+      let imageUrl;
+      if(image) {
+        const path = `todos/${Date.now()}_${image.name}`;
+        const { data, error } = await supabase.storage
+          .from('todos-img')
+          .upload(path, image);
+
+        imageUrl = supabase.storage.from('todos-img').getPublicUrl(data.path).data.publicUrl;
+      }
+      const newTodo = { title, description, image: imageUrl, user_id: userId };
 
       const { data: createdTodo, error } = await supabase
         .from("todos")
@@ -110,12 +134,12 @@ const Home = ({onSetSession, userId}) => {
       } else {
         // If not searching, we can prepend. If searching, it might disappear if it doesn't match
         // and we usually want to refresh to see the true state.
-        if (!searchQuery) {
-          setTodos((prev) => [createdTodo, ...prev]);
-        } else {
-          // Re-fetch to ensure current search context is maintained
-          fetchTodos(0, searchQuery);
-        }
+        // if (!searchQuery) {
+        //   setTodos((prev) => [createdTodo, ...prev]);
+        // } else {
+        //   // Re-fetch to ensure current search context is maintained
+        //   fetchTodos(0, searchQuery);
+        // }
       }
     }
   };
